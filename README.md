@@ -1,75 +1,136 @@
-# Libation: Liberate your Library
+# AAX to Yoto Card Converter
 
-## [Download Libation](https://github.com/rmcrackan/Libation/releases/latest)
+Convert Audible `.aax` files to Yoto Make Your Own (MYO) card compatible MP3 files with automatic chapter splitting.
 
-### If you found this useful, tell a friend. If you found this REALLY useful, you can click here to [PayPal.me](https://paypal.me/mcrackan?locale.x=en_us)
-...or just tell more friends. As long as I'm maintaining this software, it will remain **free** and **open source**.
+**This tool works entirely offline** — no Audible account connection needed. You just need your `.aax` file and activation bytes.
 
+## Features
 
+- 🔓 Decrypt `.aax` files using activation bytes
+- 📑 Automatic chapter splitting perfect for Yoto cards
+- 🎵 MP3 and M4B output formats
+- 📋 Playlist generation (M3U)
+- 🖼️ Cover art extraction
+- 📊 Metadata preservation
+- 💻 Simple command-line interface
 
-# Table of Contents
+## Installation
 
-- [Audible audiobook manager](#audible-audiobook-manager)
-    - [The good](#the-good)
-    - [The bad](#the-bad)
-    - [The ugly](#the-ugly)
-- [Getting started](Documentation/GettingStarted.md)
-    - [Download Libation](Documentation/GettingStarted.md#download-libation-1)
-    - [Installation](Documentation/GettingStarted.md#installation)
-    - [Create Accounts](Documentation/GettingStarted.md#create-accounts)
-    - [Import your library](Documentation/GettingStarted.md#import-your-library)
-    - [Download your books -- DRM-free!](Documentation/GettingStarted.md#download-your-books----drm-free)
-    - [Download PDF attachments](Documentation/GettingStarted.md#download-pdf-attachments)
-    - [Details of downloaded files](Documentation/GettingStarted.md#details-of-downloaded-files)
-    - [Export your library](Documentation/GettingStarted.md#export-your-library)
-    - If you still need help, [you can open an issue here](https://github.com/rmcrackan/Libation/issues) for bug reports, feature requests, or specialized help.
-- [Searching and filtering](Documentation/SearchingAndFiltering.md)
-    - [Tags](Documentation/SearchingAndFiltering.md#tags)
-    - [Searches](Documentation/SearchingAndFiltering.md#searches)
-    - [Search examples](Documentation/SearchingAndFiltering.md#search-examples)
-    - [Filters](Documentation/SearchingAndFiltering.md#filters)
-- [Advanced](Documentation/Advanced.md)
-    - [Files and folders](Documentation/Advanced.md#files-and-folders)
-    - [Settings](Documentation/Advanced.md#settings)
-    - [Custom File Naming](Documentation/NamingTemplates.md)
-    - [Command Line Interface](Documentation/Advanced.md#command-line-interface)
-    - [Custom Theme Colors](Documentation/Advanced.md#custom-theme-colors) (Chardonnay Only)
-    - [Audio Formats (Dolby Atmos, Widevine, Spacial Audio)](Documentation/AudioFileFormats.md)
-- [Docker](Documentation/Docker.md)
-- [Frequently Asked Questions](Documentation/FrequentlyAskedQuestions.md)
+### Prerequisites
 
-## Getting started
+- [.NET 8.0 SDK or later](https://dotnet.microsoft.com/download)
+- Your Audible activation bytes (see below)
 
-* [Download](https://github.com/rmcrackan/Libation/releases/latest)
-* [Step-by-step walk-through](Documentation/GettingStarted.md)
+### Build from Source
 
-## Audible audiobook manager
+```bash
+git clone <repo-url>
+cd Libation
+dotnet build
+```
 
-### The good
+### Run directly
 
-* Import library from audible, including cover art
-* Download and remove DRM from all books
-* Download accompanying PDFs
-* Add tags to books for better organization
-* Powerful advanced search built on the Lucene search engine
-* Customizable saved filters for common searches
-* Open source
-* Supports most regions: US, UK, Canada, Germany, France, Australia, Japan, India, and Spain
-* Fully supported in Windows, Mac, and Linux
+```bash
+dotnet run --project src/AaxToYoto.Cli -- <command> [options]
+```
 
-<a name="theBad"/>
+## Getting Your Activation Bytes
 
-### The bad
+Your activation bytes are a 4-byte (8 hex character) key specific to your Audible account. You can obtain them using:
 
-* Large file size
-* Made by a programmer, not a designer so the goals are function rather than beauty. And it shows
+- **[audible-cli](https://github.com/mkb79/audible-cli)** - Cross-platform command line tool
+- **[inAudible](https://github.com/rmcrackan/inAudible)** - Windows GUI tool
 
-### The ugly
+Example activation bytes format: `ABCD1234`
 
-* Documentation? Yer lookin' at it
-* This is a single-developer personal passion project. Support, response, updates, enhancements, bug fixes etc are as my free time allows
-* I have a full-time job, a life, and a finite attention span. Therefore a lot of time can potentially go by with no improvements of any kind
+## Usage
 
-Disclaimer: I've made every good-faith effort to include nothing insecure, malicious, anti-privacy, or destructive. That said: use at your own risk.
+### Convert for Yoto Cards (Recommended)
 
-I made this for myself and I want to share it with the great programming and audible/audiobook communities which have been so generous with their time and help.
+The `yoto` command creates chapter-split MP3 files optimized for Yoto MYO cards:
+
+```bash
+aax2yoto yoto -i "My Audiobook.aax" -a ABCD1234 -o ./output
+```
+
+This creates:
+- Individual MP3 file per chapter
+- M3U playlist
+- Cover art (cover.jpg)
+- Metadata info file
+
+**Options:**
+- `-i, --input` - Path to .aax file (required)
+- `-a, --activation` - Activation bytes (required)
+- `-o, --output` - Output directory (default: current directory)
+- `-m, --min-chapter` - Minimum chapter duration in seconds (default: 10)
+- `--no-playlist` - Don't create M3U playlist
+- `--no-cover` - Don't extract cover art
+- `--no-metadata` - Don't create info.txt file
+- `-t, --include-title` - Include book title in each filename
+
+### Convert to Single File
+
+```bash
+aax2yoto single -i "My Audiobook.aax" -a ABCD1234 -o ./output -f mp3
+```
+
+**Options:**
+- `-f, --format` - Output format: `mp3` or `m4b` (default: mp3)
+
+### Convert to Chapter Files
+
+```bash
+aax2yoto chapters -i "My Audiobook.aax" -a ABCD1234 -o ./output -f mp3
+```
+
+**Options:**
+- `-f, --format` - Output format: `mp3` or `m4b` (default: mp3)
+- `-m, --min-chapter` - Minimum chapter duration in seconds (default: 10)
+
+### Show Audiobook Info
+
+```bash
+aax2yoto info -i "My Audiobook.aax" -a ABCD1234
+```
+
+Displays metadata and chapter information without converting.
+
+## Example Output
+
+Running `yoto` command produces a directory structure like:
+
+```
+output/
+└── My Audiobook/
+    ├── 01 - Opening Credits.mp3
+    ├── 02 - Chapter 1.mp3
+    ├── 03 - Chapter 2.mp3
+    ├── ...
+    ├── My Audiobook.m3u
+    ├── cover.jpg
+    └── info.txt
+```
+
+## Creating Your Yoto Card
+
+1. Run the `yoto` command to create your chapter files
+2. Open the [Yoto app](https://yotoplay.com/app)
+3. Go to "Make Your Own"
+4. Upload the MP3 files in order
+5. Link to a blank MYO card
+
+## Technical Details
+
+- Uses [AAXClean](https://github.com/Mbucari/AAXClean) for decryption
+- MP3 encoding via LAME
+- M4B output preserves AAC audio with chapters
+
+## License
+
+GNU General Public License v3.0 - See [LICENSE](LICENSE) file
+
+## Disclaimer
+
+This tool is intended for personal backup of audiobooks you legally own. Ensure you comply with all applicable laws and Audible's terms of service.
